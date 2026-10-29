@@ -1,0 +1,121 @@
+Step 1: Open Cloudera Terminal
+Open your Cloudera VM in VirtualBox, then select Applications → System Tools → Terminal.
+
+Check whether Sqoop is installed:
+sqoop version
+
+
+Step 2: Start MySQL and create a database
+Open the terminal and enter:
+mysql -u root -p
+
+
+Enter the password if prompted. At the MySQL prompt, run:
+CREATE DATABASE labdb;
+USE labdb;
+
+
+Create a sample SQL table:
+CREATE TABLE student (
+    id INT,
+    name VARCHAR(30),
+    marks INT
+);
+
+
+Insert sample records:
+INSERT INTO student VALUES
+(1, 'Ravi', 85),
+(2, 'Priya', 90),
+(3, 'Arun', 78);
+
+
+Verify:
+SELECT * FROM student;
+
+
+Exit MySQL:
+exit;
+
+
+Step 3: Create a Hive table
+Open Hive:
+hive
+
+
+At the hive> prompt, create the destination table:
+CREATE DATABASE IF NOT EXISTS labdb;
+USE labdb;
+
+CREATE TABLE student (
+    id INT,
+    name STRING,
+    marks INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+Exit Hive:
+quit;
+
+
+Step 4: Import SQL data into Hive using Sqoop
+Run this command in the Linux terminal, not inside MySQL or Hive:
+sqoop import \
+--connect jdbc:mysql://localhost/labdb \
+--username root \
+--password cloudera \
+--table student \
+--hive-import \
+--hive-table labdb.student \
+--fields-terminated-by ',' \
+--delete-target-dir \
+-m 1
+
+Step 5: Verify imported data in Hive
+Open Hive:
+hive
+
+
+Run:
+USE labdb;
+SELECT * FROM student;
+
+
+You should see the three student records.
+
+Exit Hive:
+quit;
+
+
+Step 6: Export Hive data to the local machine
+Sqoop exports database data, while hadoop fs -get downloads HDFS data to the local filesystem. To copy the Hive table's underlying HDFS files:
+hadoop fs -ls /user/hive/warehouse/labdb.db/student
+
+
+If that path exists, run:
+hadoop fs -get /user/hive/warehouse/labdb.db/student ~/student_export
+
+
+Check the local files:
+ls ~/student_export
+
+
+The exact HDFS location may differ depending on your Hive configuration.
+Step 7: Export Hive data to SQL
+First, ensure that the MySQL student table exists and contains no conflicting records. From the Linux terminal, run:
+sqoop export \
+--connect jdbc:mysql://localhost/labdb \
+--username root \
+--password cloudera \
+--table student \
+--export-dir /user/hive/warehouse/labdb.db/student \
+--input-fields-terminated-by ',' \
+-m 1
+
+
+Purpose: Exports data stored in HDFS to the MySQL student table.
+
+Purpose: Imports records from the MySQL student table into the Hive table labdb.student.
