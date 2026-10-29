@@ -1,0 +1,99 @@
+1. Create a text file and insert data in Linux
+cat > users.txt <<'EOF'
+2025-11-03,User1,Age=21;state=CA;gender=M;
+2025-11-03,User2,Age=25;state=TX;gender=F;
+2025-11-03,User3,Age=32;state=CA;gender=M;
+2025-11-03,User4,Age=18;state=NY;gender=F;
+2025-11-03,User5,Age=40;state=TX;gender=M;
+EOF
+
+
+2. Display the file
+cat users.txt
+
+
+3. Create an input directory in HDFS
+hdfs dfs -mkdir -p /home/cloudera/input
+
+
+4. Upload the file to HDFS
+hdfs dfs -put -f /home/cloudera/users.txt /home/cloudera/input/
+
+
+5. Verify the file in HDFS
+hdfs dfs -ls /home/cloudera/input
+
+
+hdfs dfs -cat /home/cloudera/input/users.txt
+
+
+6. Open Hive
+hive
+
+
+7. Create a database
+CREATE DATABASE IF NOT EXISTS user_analysis;
+
+
+8. Select the database
+USE user_analysis;
+
+
+9. Create an external Hive table
+CREATE EXTERNAL TABLE IF NOT EXISTS userdata (
+    data_date STRING,
+    user_id STRING,
+    properties STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/user/cloudera/hive_lab/input';
+
+Note: The screenshot's Hive table location is /user/cloudera/hive_lab/input, which differs from the HDFS upload directory /home/cloudera/input. To make the table read the uploaded file, use the same location for both. You can instead upload the file to the table's location:
+hdfs dfs -mkdir -p /user/cloudera/hive_lab/input
+hdfs dfs -put -f /home/cloudera/users.txt /user/cloudera/hive_lab/input/
+
+
+10. Display Hive tables
+SHOW TABLES;
+
+
+11. View the table data
+SELECT * FROM userdata;
+
+
+12. Extract age, state, and gender using regular expressions
+CREATE TABLE userdata_parsed AS
+SELECT
+    data_date,
+    user_id,
+    regexp_extract(properties, 'Age=([0-9]+)', 1) AS age,
+    regexp_extract(properties, 'state=([A-Z]+)', 1) AS state,
+    regexp_extract(properties, 'gender=([A-Z]+)', 1) AS gender
+FROM userdata;
+
+
+13. Display the extracted results
+SELECT * FROM userdata_parsed;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
