@@ -1,0 +1,101 @@
+Check Hadoop version 
+[cloudera@quickstart Desktop]$ hadoop version 
+
+List files and directories in HDFS 
+[cloudera@quickstart Desktop]$ hadoop fs -ls 
+
+List directories under HDFS root 
+[cloudera@quickstart Desktop]$ hadoop fs -ls / 
+
+Copy a file from local filesystem to HDFS 
+[cloudera@quickstart Desktop]$ cat > students.txt 
+1,kriti,cse,45 
+2,neha,ece,56 
+3,jyothi,ce,78 
+4,priya,mechanical,89 
+  
+[cloudera@quickstart Desktop]$ cat students.txt 
+
+[cloudera@quickstart Desktop]$ hadoop fs -copyFromLocal students.txt /user/cloudera
+
+Copy a local file to HDFS using put 
+[cloudera@quickstart Desktop]$ hadoop fs -put students.txt /user/cloudera/studentscopied.txt
+
+  Copy a file from HDFS to local filesystem 
+[cloudera@quickstart Desktop]$ hadoop fs -copyToLocal students.txt  studentscopiedtolocal.txt
+
+Check HDFS health 
+[cloudera@quickstart Desktop]$ hdfs fsck / 
+
+Create a directory in HDFS 
+[cloudera@quickstart Desktop]$ hadoop fs -mkdir kriti2018 
+
+Copy a file within HDFS 
+[cloudera@quickstart Desktop]$ hadoop fs -mkdir -p kriti2018 
+[cloudera@quickstart Desktop]$ hadoop fs -cp students.txt kriti2018 
+
+Create an empty HDFS file 
+[cloudera@quickstart Desktop]$ hadoop fs -touchz empty.txt 
+
+Check the size of an HDFS file 
+[cloudera@quickstart Desktop]$ hadoop fs -du -s students.txt
+
+Print the contents of an HDFS file 
+[cloudera@quickstart Desktop]$ hadoop fs -cat students.txt
+
+Count files and directories 
+[cloudera@quickstart Desktop]$ hadoop fs -count kriti2018 
+
+Remove a file from HDFS 
+[cloudera@quickstart Desktop]$ hadoop fs -rm empty.txt 
+
+Delete an HDFS directory completely 
+[cloudera@quickstart Desktop]$ hadoop fs -rm -r kriti2018 
+
+Copy files within HDFS using cp 
+[cloudera@quickstart Desktop]$ hadoop fs -mkdir kriti2018 
+[cloudera@quickstart Desktop]$ hadoop fs -cp students.txt kriti2018 
+[cloudera@quickstart Desktop]$ hadoop fs -ls kriti2018 
+
+Move a file in HDFS 
+[cloudera@quickstart Desktop]$ hadoop fs -touchz emptyfile.txt 
+[cloudera@quickstart Desktop]$ hadoop fs -mv emptyfile.txt kriti2018 
+[cloudera@quickstart Desktop]$ hadoop fs -ls kriti2018 
+
+Get help for an individual command 
+[cloudera@quickstart Desktop]$ hdfs dfs -usage mkdir 
+
+Get help for HDFS commands 
+[cloudera@quickstart Desktop]$ hadoop fs -help 
+Usage: hadoop fs [generic options] 
+[-appendToFile <localsrc> ... <dst>] 
+
+Check HDFS memory/storage status 
+[cloudera@quickstart Desktop]$ hadoop fs -df 
+
+Check cluster balancing 
+[cloudera@quickstart Desktop]$ hadoop balancer 
+
+Change permissions to 777 
+[cloudera@quickstart Desktop]$ hadoop fs -ls -r 
+
+[cloudera@quickstart Desktop]$ hadoop fs -chmod 777 /user/cloudera/studentscopied.txt 
+[cloudera@quickstart Desktop]$ hadoop fs -ls -r 
+
+empty hdfs trash
+[cloudera@quickstart Desktop]$ hadoop fs -expunge 
+
+Display the last kilobyte of a file 
+[cloudera@quickstart Desktop]$ hadoop fs -tail /user/cloudera/students.txt 
+
+Append a local file to an HDFS file 
+[cloudera@quickstart Desktop]$ echo "This is the first file." > first.txt 
+[cloudera@quickstart Desktop]$ echo "This is the second file." > second.txt 
+[cloudera@quickstart Desktop]$ hadoop fs -copyFromLocal second.txt /user/cloudera/ 
+[cloudera@quickstart Desktop]$ hadoop fs -appendToFile /home/cloudera/Desktop/first.txt 
+/user/cloudera/second.txt 
+[cloudera@quickstart Desktop]$ hadoop fs -cat /user/cloudera/second.txt 
+
+
+
+  
