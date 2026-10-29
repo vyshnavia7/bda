@@ -1,0 +1,156 @@
+Since you are using Apache Hive 1.1.0 in Cloudera QuickStart, let's update your UNIT-III lab so that `age`, `state`, and `gender` are stored in separate columns instead of combining them into one `properties` column.
+
+The important point is that your version does not support the multi-row `INSERT ... VALUES` syntax, so we will insert records using a compatible method.
+
+## Part A: Create the updated table
+
+Run this in the `hive>` prompt:
+
+```
+CREATE TABLE user_data (
+    data_date STRING,
+    user_id STRING,
+    age INT,
+    state STRING,
+    gender STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+```
+
+Now the table has five columns:
+
+| Column      | Example      |
+| ----------- | ------------ |
+| `data_date` | `2026-10-01` |
+| `user_id`   | `U01`        |
+| `age`       | `21`         |
+| `state`     | `CA`         |
+| `gender`    | `M`          |
+
+If your old `user_data` table already exists, use a new name such as `user_data_new`, or drop the old table only if you no longer need its data.
+
+## Part B: Insert records separately
+
+### Record 1
+
+```
+INSERT INTO TABLE user_data
+SELECT '2026-10-01', 'U01', 21, 'CA', 'M';
+```
+
+### Record 2
+
+```
+INSERT INTO TABLE user_data
+SELECT '2026-10-02', 'U02', 25, 'NY', 'F';
+```
+
+### Record 3
+
+```
+INSERT INTO TABLE user_data
+SELECT '2026-10-03', 'U03', 21, 'CA', 'F';
+```
+
+### Record 4
+
+```
+INSERT INTO TABLE user_data
+SELECT '2026-10-04', 'U04', 30, 'TX', 'M';
+```
+
+### Record 5
+
+```
+INSERT INTO TABLE user_data
+SELECT '2026-10-05', 'U05', 25, 'NY', 'M';
+```
+
+### Record 6
+
+```
+INSERT INTO TABLE user_data
+SELECT '2026-10-06', 'U06', 35, 'CA', 'F';
+```
+
+Each command inserts exactly one row. Execute them one at a time.
+
+## Part C: Verify the inserted records
+
+```
+SELECT * FROM user_data;
+```
+
+Expected output:
+
+| data_date  | user_id | age | state | gender |
+| ---------- | ------- | --- | ----- | ------ |
+| 2026-10-01 | U01     | 21  | CA    | M      |
+| 2026-10-02 | U02     | 25  | NY    | F      |
+| 2026-10-03 | U03     | 21  | CA    | F      |
+| 2026-10-04 | U04     | 30  | TX    | M      |
+| 2026-10-05 | U05     | 25  | NY    | M      |
+| 2026-10-06 | U06     | 35  | CA    | F      |
+
+## Part D: Calculate minimum, maximum and unique values
+
+Because the properties are now separate columns, you no longer need `REGEXP_EXTRACT()` or the `extracted_data` view.
+
+### 1. Age statistics
+
+```
+SELECT
+    MIN(age) AS min_age,
+    MAX(age) AS max_age,
+    COUNT(DISTINCT age) AS unique_ages
+FROM user_data;
+```
+
+Expected result: minimum age = `21`, maximum age = `35`, unique ages = `4`.
+
+### 2. State statistics
+
+```
+SELECT
+    MIN(state) AS min_state,
+    MAX(state) AS max_state,
+    COUNT(DISTINCT state) AS unique_states
+FROM user_data;
+```
+
+Expected result: minimum state = `CA`, maximum state = `TX`, unique states = `3`.
+
+### 3. Gender statistics
+
+```
+SELECT
+    MIN(gender) AS min_gender,
+    MAX(gender) AS max_gender,
+    COUNT(DISTINCT gender) AS unique_genders
+FROM user_data;
+```
+
+Expected result: minimum gender = `F`, maximum gender = `M`, unique genders = `2`.
+
+## Part E: Count records per state
+
+```
+SELECT
+    state,
+    COUNT(*) AS state_count
+FROM user_data
+GROUP BY state
+ORDER BY state;
+```
+
+Expected output:
+
+| State | State count |
+| ----- | ----------- |
+| CA    | 3           |
+| NY    | 2           |
+| TX    | 1           |
+
+Lab-exam tip: The updated table structure is easier to query because `age` is numeric and `state` and `gender` are directly accessible. This eliminates the need to extract values from a combined properties string.
