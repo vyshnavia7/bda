@@ -1,0 +1,94 @@
+1. Create logs.txt
+Run these commands in the Cloudera Linux terminal ([cloudera@quickstart ~]$), not in Grunt.
+cat > /home/cloudera/logs.txt <<'EOF'
+google.com	10	100	2026-10-27
+youtube.com	10	200	2026-10-27
+google.com	11	150	2026-10-27
+facebook.com	10	50	2026-10-28
+youtube.com	11	300	2026-10-28
+google.com	10	120	2026-10-28
+facebook.com	12	80	2026-10-28
+EOF
+
+
+Verify the file:
+cat /home/cloudera/logs.txt
+
+
+Check the number of records:
+wc -l /home/cloudera/logs.txt
+
+
+Expected: 7
+2. Upload logs.txt to HDFS
+Run each command separately:
+hadoop fs -mkdir -p /data/pig/simple_logs
+
+
+hadoop fs -put -f /home/cloudera/logs.txt /data/pig/simple_logs/logs.txt
+
+
+hadoop fs -ls /data/pig/simple_logs
+
+
+Verify the uploaded contents:
+hadoop fs -cat /data/pig/simple_logs/logs.txt
+
+>pig
+
+(i) Total views per hour per day
+logs = LOAD '/data/pig/simple_logs/logs.txt' USING PigStorage('\t') AS (site:chararray, hour_of_day:int, page_views:int, data_date:chararray);
+
+
+DUMP logs;
+
+
+g1 = GROUP logs BY (data_date, hour_of_day);
+
+
+r1 = FOREACH g1 GENERATE group.data_date, group.hour_of_day, SUM(logs.page_views) AS total_views;
+
+
+DUMP r1;
+
+
+(ii) Total views per day
+g2 = GROUP logs BY data_date;
+
+
+r2 = FOREACH g2 GENERATE group AS data_date, SUM(logs.page_views) AS total_views;
+
+
+DUMP r2;
+
+
+(iii) Total views for each hour across all days
+g3 = GROUP logs BY hour_of_day;
+
+
+r3 = FOREACH g3 GENERATE group AS hour_of_day, SUM(logs.page_views) AS total_views;
+
+
+DUMP r3;
+
+1. Pass a text file as input
+If you want to pass a local text file as input, first upload it to HDFS from the Linux terminal:
+hadoop fs -put -f /home/cloudera/Desktop/input.txt /data/pig/input.txt
+
+2. Create the Word Count script in Pig Grunt
+lines = LOAD '/data/pig/input.txt' USING TextLoader() AS (line:chararray);
+
+
+words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) AS word;
+
+
+grouped = GROUP words BY word;
+
+
+result = FOREACH grouped GENERATE group AS word, COUNT(words) AS count;
+
+
+DUMP result;
+
+
+You should see all seven records.
