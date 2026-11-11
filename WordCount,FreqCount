@@ -1,0 +1,11 @@
+open this url on browser(cloudera):
+https://blog.devgenius.io/performing-word-count-with-hadoop-a-step-by-step-guide-0a44bc2adb68?gi=26efcdb3331f
+
+then follow method2
+
+for freq count: hadoop fs -cat /user/nielit/output/part-r-00000 | sort -k2 -nr
+
+or simply use:
+wget --no-check-certificate http://raw.githubusercontent.com/arbazahmed07/wc/main/run.sh
+chmod +x run.sh
+bash run.sh
